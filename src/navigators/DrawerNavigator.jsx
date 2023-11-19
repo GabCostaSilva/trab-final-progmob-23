@@ -14,7 +14,7 @@ function CustomDrawerContent(props) {
                 color="red"
                 onPress={() => {
                     // Navigate using the `navigation` prop that you received
-                    navigation.navigate('SomeScreen');
+                    props.navigation.navigate('SomeScreen');
                 }}
             />
         </DrawerContentScrollView>
