@@ -20,10 +20,8 @@ class PostController {
         return await this.postService.getPostById(id)
     }
 
-    async createPost(postData) {
-        console.debug(postData)
+    async createPost({imageUri, imageType}) {
         this.ref = ref(this.storage, this.auth.currentUser.uid + '/photos/' + media.assets[0].id + '.jpg');
-        console.log(postData)
         await uploadBytes(this.ref, postData.photo, {contentType: 'image/jpeg'})
     }
 
