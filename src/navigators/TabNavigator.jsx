@@ -18,7 +18,7 @@ export default function TabNavigator() {
                 <FontAwesome name="plus" size={size} color={color}/>
             )
         }}/>
-        <Tab.Screen name="Perfil" component={DrawerNavigator} options={{
+        <Tab.Screen name="Usuário" component={DrawerNavigator} options={{
             headerShown: false,
             tabBarIcon: ({focused, color, size}) => (
                 <FontAwesome name="user" size={size} color={color}/>

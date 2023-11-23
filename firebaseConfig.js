@@ -1,7 +1,8 @@
 // Import the functions you need from the SDKs you need
 import {initializeApp} from "firebase/app";
-import {getAnalytics} from "firebase/analytics";
-import { getAuth } from "firebase/auth";
+import {getAuth, initializeAuth, getReactNativePersistence} from "firebase/auth";
+import {getDatabase} from "firebase/database";
+import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -9,16 +10,21 @@ import { getAuth } from "firebase/auth";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-    apiKey: "AIzaSyCnhq4uinoHjOOcudgufZYGzxlnw0vfppY",
-    authDomain: "photogram-ufms.firebaseapp.com",
-    projectId: "photogram-ufms",
-    storageBucket: "photogram-ufms.appspot.com",
-    messagingSenderId: "886783114643",
-    appId: "1:886783114643:web:f2b5dd459e3f47d4fb7c66",
-    measurementId: "G-5VZFL8ZYQ9"
+    apiKey: "AIzaSyARQBc7YD2EwjUgg7u25c2I5P0EtJFBB48",
+    authDomain: "photogram-35378.firebaseapp.com",
+    projectId: "photogram-35378",
+    storageBucket: "photogram-35378.appspot.com",
+    messagingSenderId: "774000284604",
+    appId: "1:774000284604:web:f0f0a932f5179cac6611b9",
+    measurementId: "G-CDTCZMXR6V",
+    databaseURL: "https://photogram-35378-default-rtdb.firebaseio.com",
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const auth = getAuth(app);
+
+export const auth = initializeAuth(app, {
+    persistence: getReactNativePersistence(ReactNativeAsyncStorage),
+});
+
+export const database = getDatabase(app);

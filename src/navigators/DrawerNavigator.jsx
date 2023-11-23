@@ -1,20 +1,27 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {createDrawerNavigator, DrawerContentScrollView, DrawerItemList} from "@react-navigation/drawer";
-import Feed from "../screens/Feed";
 import {Button} from "react-native";
+import Profile from "../screens/Profile";
+import {Settings} from "../screens/Settings";
+import {signOut} from "firebase/auth";
+import {auth} from "../../firebaseConfig";
 
 const Drawer = createDrawerNavigator();
 
 function CustomDrawerContent(props) {
+    const [isLoading, setIsLoading] = useState(false);
+
     return (
         <DrawerContentScrollView>
             <DrawerItemList {...props} />
             <Button
                 title="Sair"
                 color="red"
-                onPress={() => {
-                    // Navigate using the `navigation` prop that you received
-                    props.navigation.navigate('SomeScreen');
+                onPress={async () => {
+                    setIsLoading(true)
+                    await signOut(auth)
+                    setIsLoading(false)
+                    props.navigation.navigate('PhotoGram')
                 }}
             />
         </DrawerContentScrollView>
@@ -24,8 +31,8 @@ function CustomDrawerContent(props) {
 function DrawerNavigator() {
     return (
         <Drawer.Navigator drawerContent={(props) => <CustomDrawerContent {...props}/>}>
-            <Drawer.Screen name="Perfil" component={Feed}/>
-            <Drawer.Screen name="Configurações" component={Feed}/>
+            <Drawer.Screen name="Perfil" component={Profile}/>
+            <Drawer.Screen name="Configurações" component={Settings}/>
         </Drawer.Navigator>
     );
 }
