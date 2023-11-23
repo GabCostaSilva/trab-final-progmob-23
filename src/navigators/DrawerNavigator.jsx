@@ -21,7 +21,7 @@ function CustomDrawerContent(props) {
                     setIsLoading(true)
                     await signOut(auth)
                     setIsLoading(false)
-                    props.navigation.navigate('PhotoGram')
+                    props.navigation.navigate('Login')
                 }}
             />
         </DrawerContentScrollView>

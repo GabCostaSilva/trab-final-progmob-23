@@ -1,49 +1,6 @@
-import {FlatList, Image, StyleSheet, Text, View} from "react-native";
+import {FlatList, Image, Text, View} from "react-native";
+import stylesZ from "../Styles";
 
-const linkColor = '#279';
-
-const styles = StyleSheet.create({
-    postContainer: {
-        flex: 1,
-        backgroundColor: '#fff',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: '100%',
-        height: 300,
-        borderBottomWidth: 1,
-        borderBottomColor: '#ddd',
-    },
-    circle: {
-        width: 44,
-        height: 44,
-        borderRadius: 44 / 2,
-        marginRight: 10,
-        backgroundColor: '#ddd',
-    },
-    heading: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-        width: '100%',
-        height: 44,
-        paddingLeft: 10,
-        marginBottom: 10,
-    },
-    location: {
-        fontSize: 12,
-        color: linkColor,
-        marginLeft: "auto",
-        marginRight: 10,
-    },
-    caption: {
-        fontSize: 14,
-        color: '#333',
-        paddingLeft: 10,
-        paddingRight: 10,
-        marginRight: "auto",
-        marginLeft: 10,
-    }
-});
 
 export default function Feed() {
     return (
@@ -73,17 +30,17 @@ export default function Feed() {
                 }
             ]}
             renderItem={({item}) => (
-                <View style={styles.postContainer}>
-                    <View style={styles.heading}>
-                        <Image source={{uri: item.profileImg}} style={styles.circle}/>
+                <View style={stylesZ.postContainer}>
+                    <View style={stylesZ.heading}>
+                        <Image source={{uri: item.profileImg}} style={stylesZ.circle}/>
                         <Text>{item.userName}</Text>
-                        <Text style={styles.location}>{item.location}</Text>
+                        <Text style={stylesZ.location}>{item.location}</Text>
                     </View>
                     <Image
                         source={{uri: item.imgUri}}
                         style={{width: 350, height: 200}}
                     />
-                    <Text style={styles.caption}>
+                    <Text style={stylesZ.caption}>
                         {item.caption}
                     </Text>
                 </View>
