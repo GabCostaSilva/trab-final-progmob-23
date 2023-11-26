@@ -6,26 +6,21 @@ import {getStorage, ref, uploadBytes, getDownloadURL} from "firebase/storage";
 import {auth, database} from "../../firebaseConfig";
 import * as Location from 'expo-location';
 import GeoLocationController from "../adapters/controllers/geoLocationController";
-import {ref as dbRef, set} from "firebase/database";
+import {collection, doc, addDoc, setDoc} from "firebase/firestore";
 
 async function saveImageToUser(userId: string,
                                imageUrl: string,
-                               caption: string | null,
                                location: string) {
     console.log('saving image to user')
-    console.log('userId', userId)
-    console.log('imageUrl', imageUrl)
-    console.log('caption', caption)
-    console.log('location', location)
-    set(dbRef(database, 'photos/user/' + userId), {
-        user: userId,
-        imageUrl,
-        caption,
-        location
-    }).then((solved) => {
-        console.log('saved image to user')
-    }).catch((error) => {
-        console.error('error saving image to user', error)
+
+    const collectionReference = collection(database, "photos");
+    const photosRef = doc(database, "photos", Date.now().toString())
+
+    await setDoc(doc(collectionReference), {
+        userId: userId,
+        userEmail: auth.currentUser.email,
+        imageUrl: imageUrl,
+        location: location,
     });
 }
 
@@ -100,7 +95,7 @@ export default function Post({navigation}) {
                 setIsLoading(true)
                 const uploadResult = await uploadBytes(upload, blob, {contentType: 'image/jpeg'});
                 const downloadURL = await getDownloadURL(uploadResult.ref);
-                await saveImageToUser(auth.currentUser.uid, downloadURL, null, location);
+                await saveImageToUser(auth.currentUser.uid, downloadURL, location);
                 setIsLoading(false)
                 alert('Foto salva com sucesso!')
             } catch (e) {
