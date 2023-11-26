@@ -1,54 +1,37 @@
 import {ActivityIndicator, ImageBackground, StyleSheet, Text, TouchableOpacity, View} from "react-native";
 import {Camera, CameraType} from 'expo-camera';
-import * as MediaLibrary from 'expo-media-library';
 import {useEffect, useRef, useState} from "react";
 import {FontAwesome, Ionicons} from '@expo/vector-icons';
-import PostController from "../adapters/controllers/post.controller";
-import {getStorage, ref, uploadBytes} from "firebase/storage";
-import {auth} from "../../firebaseConfig";
+import {getStorage, ref, uploadBytes, getDownloadURL} from "firebase/storage";
+import {auth, database} from "../../firebaseConfig";
+import * as Location from 'expo-location';
+import GeoLocationController from "../adapters/controllers/geoLocationController";
+import {ref as dbRef, set} from "firebase/database";
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-    camera: {
-        width: '100%',
-        height: '100%',
-    },
-    button: {
-        flex: 1,
-        alignSelf: 'flex-end',
-        alignItems: 'center',
-    },
-    text: {
-        fontSize: 18,
-        color: 'white',
-    },
-    photoTaken: {
-        flex: 1,
-        justifyContent: "flex-end",
-        alignItems: "flex-end",
-        width: "100%",
-        height: "100%",
-        backgroundColor: "transparent",
-    },
-    photoTakenControls: {
-        flexDirection: "row",
-        justifyContent: "space-around",
-        alignItems: "flex-end",
-        marginBottom: 20,
-        backgroundColor: "rgba(0,0,0,0.5)",
-        width: "100%",
-    },
-    buttonsContainer: {
-        flex: 1,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        margin: 20,
-    }
-})
+async function saveImageToUser(userId: string,
+                               imageUrl: string,
+                               caption: string | null,
+                               location: string) {
+    console.log('saving image to user')
+    console.log('userId', userId)
+    console.log('imageUrl', imageUrl)
+    console.log('caption', caption)
+    console.log('location', location)
+    set(dbRef(database, 'photos/user/' + userId), {
+        user: userId,
+        imageUrl,
+        caption,
+        location
+    }).then((solved) => {
+        console.log('saved image to user')
+    }).catch((error) => {
+        console.error('error saving image to user', error)
+    });
+}
 
 export default function Post({navigation}) {
+    const [location, setLocation] = useState(null);
+    const [errorMsg, setErrorMsg] = useState(null);
     const [type, setType] = useState(CameraType.back);
     const [isCameraGranted, setIsCameraGranted] = useState(null);
     const [takenPhoto, setTakenPhoto] = useState(null);
@@ -56,17 +39,25 @@ export default function Post({navigation}) {
     const cameraRef = useRef(null)
 
     const firebaseStorage = getStorage();
-    const postController = new PostController();
+
+    const geolocationController = new GeoLocationController();
 
     useEffect(() => {
         (async () => {
             const cameraStatus = await Camera.requestCameraPermissionsAsync()
-            console.debug(new Date().toISOString(), "Camera status", cameraStatus)
             setIsCameraGranted(cameraStatus.granted)
 
-            const mediaPermission = await MediaLibrary.requestPermissionsAsync();
-            console.debug(new Date().toISOString(), "Media permission", mediaPermission)
+            let {status} = await Location.requestForegroundPermissionsAsync();
+            if (status !== 'granted') {
+                setErrorMsg('Permission to access location was denied');
+                return;
+            }
+
+            let currentPosition = await Location.getCurrentPositionAsync({});
+            const geoLocation = await geolocationController.getGeolocation(currentPosition.coords.latitude, currentPosition.coords.longitude);
+            setLocation(geoLocation);
         })()
+
     }, [])
 
     if (null === isCameraGranted)
@@ -107,7 +98,9 @@ export default function Post({navigation}) {
                 const blob: Blob = await response.blob();
                 const upload = ref(firebaseStorage, auth.currentUser.uid + '/photos/' + filename);
                 setIsLoading(true)
-                await uploadBytes(upload, blob, {contentType: 'image/jpeg'})
+                const uploadResult = await uploadBytes(upload, blob, {contentType: 'image/jpeg'});
+                const downloadURL = await getDownloadURL(uploadResult.ref);
+                await saveImageToUser(auth.currentUser.uid, downloadURL, null, location);
                 setIsLoading(false)
                 alert('Foto salva com sucesso!')
             } catch (e) {
@@ -155,3 +148,44 @@ export default function Post({navigation}) {
         </View>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+    },
+    camera: {
+        width: '100%',
+        height: '100%',
+    },
+    button: {
+        flex: 1,
+        alignSelf: 'flex-end',
+        alignItems: 'center',
+    },
+    text: {
+        fontSize: 18,
+        color: 'white',
+    },
+    photoTaken: {
+        flex: 1,
+        justifyContent: "flex-end",
+        alignItems: "flex-end",
+        width: "100%",
+        height: "100%",
+        backgroundColor: "transparent",
+    },
+    photoTakenControls: {
+        flexDirection: "row",
+        justifyContent: "space-around",
+        alignItems: "flex-end",
+        marginBottom: 20,
+        backgroundColor: "rgba(0,0,0,0.5)",
+        width: "100%",
+    },
+    buttonsContainer: {
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        margin: 20,
+    }
+})

@@ -29,11 +29,17 @@
     "plugins": [
       "expo-camera",
       [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Permita que $(PRODUCT_NAME) use sua localização."
+        }
+      ],
+      [
         "expo-media-library",
         {
-          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera.",
-          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos.",
-          "savePhotosPermission": "Allow $(PRODUCT_NAME) to save photos.",
+          "cameraPermission": "Permita que $(PRODUCT_NAME) acesse sua camera.",
+          "photosPermission": "Permita que $(PRODUCT_NAME) acesse suas fotos.",
+          "savePhotosPermission": "Permita que $(PRODUCT_NAME) salve fotos.",
           "isAccessMediaLocationEnabled": true
         }
       ]
