@@ -5,16 +5,15 @@ import {FontAwesome, Ionicons} from '@expo/vector-icons';
 import {getStorage, ref, uploadBytes, getDownloadURL} from "firebase/storage";
 import {auth, database} from "../../firebaseConfig";
 import * as Location from 'expo-location';
-import GeoLocationController from "../adapters/controllers/geoLocationController";
+import GeoLocationController, {GeoLocationControllerInterface} from "../adapters/controllers/geoLocationController";
 import {collection, doc, addDoc, setDoc} from "firebase/firestore";
 
 async function saveImageToUser(userId: string,
                                imageUrl: string,
-                               location: string) {
+                               location: GeoLocationControllerInterface) {
     console.log('saving image to user')
 
     const collectionReference = collection(database, "photos");
-    const photosRef = doc(database, "photos", Date.now().toString())
 
     await setDoc(doc(collectionReference), {
         userId: userId,
@@ -38,20 +37,23 @@ export default function Post({navigation}) {
     const geolocationController = new GeoLocationController();
 
     useEffect(() => {
-        (async () => {
-            const cameraStatus = await Camera.requestCameraPermissionsAsync()
-            setIsCameraGranted(cameraStatus.granted)
+        navigation.onUnsubscribe = navigation.addListener('focus', () => {
 
-            let {status} = await Location.requestForegroundPermissionsAsync();
-            if (status !== 'granted') {
-                setErrorMsg('Permission to access location was denied');
-                return;
-            }
+            (async () => {
+                const cameraStatus = await Camera.requestCameraPermissionsAsync()
+                setIsCameraGranted(cameraStatus.granted)
 
-            let currentPosition = await Location.getCurrentPositionAsync({});
-            const geoLocation = await geolocationController.getGeolocation(currentPosition.coords.latitude, currentPosition.coords.longitude);
-            setLocation(geoLocation);
-        })()
+                let {status} = await Location.requestForegroundPermissionsAsync();
+                if (status !== 'granted') {
+                    setErrorMsg('Permission to access location was denied');
+                    return;
+                }
+
+                let currentPosition = await Location.getCurrentPositionAsync({});
+                const geoLocation = await geolocationController.getGeolocation(currentPosition.coords.latitude, currentPosition.coords.longitude);
+                setLocation(geoLocation);
+            })()
+        })
 
     }, [])
 
@@ -67,6 +69,7 @@ export default function Post({navigation}) {
 
     async function takePicture() {
         setTakenPhoto(null)
+
         const cameraCapturedPicture = await cameraRef.current.takePictureAsync({
             quality: 1,
             skipProcessing: true,
@@ -95,7 +98,9 @@ export default function Post({navigation}) {
                 setIsLoading(true)
                 const uploadResult = await uploadBytes(upload, blob, {contentType: 'image/jpeg'});
                 const downloadURL = await getDownloadURL(uploadResult.ref);
-                await saveImageToUser(auth.currentUser.uid, downloadURL, location);
+                let currentPosition = await Location.getCurrentPositionAsync({});
+                const geoLocation = await geolocationController.getGeolocation(currentPosition.coords.latitude, currentPosition.coords.longitude);
+                await saveImageToUser(auth.currentUser.uid, downloadURL, geoLocation);
                 setIsLoading(false)
                 alert('Foto salva com sucesso!')
             } catch (e) {

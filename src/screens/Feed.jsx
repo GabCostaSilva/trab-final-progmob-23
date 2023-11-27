@@ -4,28 +4,33 @@ import {useEffect, useState} from "react";
 import {auth, database} from "../../firebaseConfig";
 import {collection, getDocs} from "firebase/firestore";
 
-export default function Feed({route}) {
+export default function Feed({navigation}) {
     const [posts, setPosts] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
 
     useEffect(() => {
+        setIsLoading(true)
         const user = auth.currentUser;
         setCurrentUser(user);
+        navigation.onUnsubscribe = navigation.addListener('focus', () => {
+            console.log("Feed focused")
 
-        async function getPosts() {
-            const querySnapshot = await getDocs(collection(database, "photos"));
-            const documentData = querySnapshot.docs.map(
-                (doc) => doc.data()
-            );
-            console.debug("documentData", documentData)
-            setPosts(documentData)
-        }
+            async function getPosts() {
+                const querySnapshot = await getDocs(collection(database, "photos"));
+                const documentData = querySnapshot.docs.map(
+                    (doc) => doc.data()
+                );
+                setPosts(documentData)
+            }
 
-        (async () => {
-            setIsLoading(true)
-            await getPosts();
-        })()
+            (async () => {
+                console.log("getting posts")
+                setIsLoading(true)
+                await getPosts();
+            })()
+        })
+        console.log("Feed mounted")
 
         setIsLoading(false)
     }, []);

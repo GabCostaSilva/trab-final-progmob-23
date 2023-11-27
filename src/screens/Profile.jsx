@@ -6,28 +6,30 @@ import styles from "../Styles";
 import stylesZ from "../Styles";
 import {collection, query, where, getDocs} from "firebase/firestore";
 
-export default function Profile({route}) {
+export default function Profile({navigation}) {
     const [photos, setPhotos] = useState([]);
     const storage = getStorage();
     const listRef = ref(storage, auth.currentUser.uid + "/photos");
     const [isLoading, setIsLoading] = useState(false)
 
     useEffect(() => {
-        (async () => {
-            setIsLoading(true)
-            const {items, prefixes} = await listAll(listRef);
+        navigation.onUnsubscribe = navigation.addListener('focus', () => {
+            (async () => {
+                setIsLoading(true)
+                const {items, prefixes} = await listAll(listRef);
 
-            const storageReferences = items
-                .map(async (item) => getDownloadURL(ref(storage, item.fullPath)))
+                const storageReferences = items
+                    .map(async (item) => getDownloadURL(ref(storage, item.fullPath)))
 
-            const q = query(collection(database, "photos"), where("userId", "==", auth.currentUser.uid));
-            const querySnapshot = await getDocs(q);
-            const documentData = querySnapshot.docs.map((doc) => doc.data());
-            console.debug("querySnapshot.docs", documentData)
-            setPhotos(documentData);
-            setIsLoading(false)
-            return storageReferences;
-        })()
+                const q = query(collection(database, "photos"), where("userId", "==", auth.currentUser.uid));
+                const querySnapshot = await getDocs(q);
+                const documentData = querySnapshot.docs.map((doc) => doc.data());
+                console.debug("querySnapshot.docs", documentData)
+                setPhotos(documentData);
+                setIsLoading(false)
+                return storageReferences;
+            })()
+        })
     }, []);
 
     return isLoading

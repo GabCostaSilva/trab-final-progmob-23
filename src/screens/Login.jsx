@@ -34,18 +34,20 @@ export default function Login({navigation}) {
             <KeyboardAvoidingView behavior={"position"}>
                 <Text style={styles.title}>Photogram</Text>
                 <TextInput onChangeText={setEmail} style={styles.input} autoCapitalize={"none"} placeholder="Email"/>
-                <TextInput onChangeText={setPassword} style={styles.input} secureTextEntry={true}
+                <TextInput onChangeText={setPassword}
+                           style={styles.input}
+                           secureTextEntry={true}
                            autoCapitalize={"none"}
                            placeholder="Senha"/>
                 {
                     isLoading
-                        ? <ActivityIndicator size={"large"} color={"#000fff"}/>
+                        ? <ActivityIndicator size={"large"} color={"#0099ff"}/>
                         : <ButtonContainer>
                             <Button title="Entrar"
-                                    color={"#000fff"}
+                                    color={"#0099ff"}
                                     onPress={signIn}/>
                             <Button title="Criar conta"
-                                    color={"#aacc00"}
+                                    color={"#00ff55"}
                                     style={{marginBottom: 20}}
                                     onPress={() => {
                                         navigation.navigate("Registro")
